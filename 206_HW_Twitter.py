@@ -2,6 +2,7 @@ import unittest
 import tweepy
 import requests
 import json
+import twitter_info
 
 ## SI 206 - HW
 ## COMMENT WITH:
@@ -46,10 +47,17 @@ import json
 ## Get your secret values to authenticate to Twitter. You may replace each of these 
 ## with variables rather than filling in the empty strings if you choose to do the secure way 
 ## for EC points
-consumer_key = "E9i3idJHgc3XDxUSvMlGQchPp" 
-consumer_secret = "LiqiaWMg3RCvU0qBav9pgW80n2IodVv4b0kYh8zb1BTDDZhi3W"
-access_token = "921092691676540929-oapeEEHauSRmXCfw9mcyXgpcUsJqZcV"
-access_token_secret = "gNaVZMklPqzeWewrcgIWpVhzTnH3FfNNikahjMfjFvzes"
+#import importlib.util
+#spec = importlib.util.spec_from_file_location("twitter_info","/Users/Jess/Desktop/t_info/twitter_info.py")
+#twitter_info = importlib.util.module_from_spec(spec)
+#spec.loader.exec_module(twitter_info)
+
+consumer_key = twitter_info.consumer_key
+consumer_secret = twitter_info.consumer_secret
+access_token = twitter_info.access_token
+access_token_secret = twitter_info.access_token_secret
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
 ## Set up your authentication to Twitter
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
@@ -81,25 +89,46 @@ except:
 ##		to search for is. 
 
 def get_twitter(search_term):
-	term = input("Enter a search term: ")
-	if term in CACHE_DICTION:
-		print("Data was in the cache")
-		return CACHE_DICTION[term]
-	else: 
+	search = "twitter_{}".format(search_term)
+	if search in CACHE_DICTION:
 		print("Data in the Cache")
-		results = api.search(q = search_term)
-		r = requests.get()
-		try:
-			CACHE_DICTION[term] =  json.loads(r)
-			dumped_json_cache = json.dumps(CACHE_DICTION)
-			fw = open(CACHE_FNAME,"w")
-			fw.write(dumped_json_cache)
-			fw.close()
-			return CACHE_DICTION[term]
+		data = CACHE_DICTION[search]
+	else:
+		print("Fetching")
+
+		results = api.search(q=search_term)
+
+		CACHE_DICTION[search] = results
+		data = CACHE_DICTION[search]
+		cache_file = open(CACHE_FNAME, 'w')
+		cache_file.write(json.dumps(CACHE_DICTION[search]))
+		cache_file.close()
+	return data
+	#search = "Twitter_" + search_term
+
+	#if search in CACHE_DICTION:
+	#	print("Data was in the cache")
+	#	return CACHE_DICTION[search]
+	#else: 
+	#	print("Data in the Cache")
+	#	results = api.search(q = search)
+	#	CACHE_DICTION[search] = results
+	#	cache_file = open(CACHE_FNAME,"w")
+	#	cache_file.write(json.dumps(CACHE_DICTION[search]))
+	#	cache_file.close()
+	#return CACHE_DICTION[search]
+
 
 ## 3. Using a loop, invoke your function, save the return value in a variable, and explore the 
 ##		data you got back!
 #fetching to print out top 5 tweets
+for term in range(3):
+	search_term = input("Enter a search term: ")
+	results = get_twitter(search_term)
+	print(results)
+	for r in results["statuses"][:5]:
+		print("Text:", r["text"])
+		print("Created at", r["created_at"])
 
 ## 4. With what you learn from the data -- e.g. how exactly to find the 
 ##		text of each tweet in the big nested structure -- write code to print out 
