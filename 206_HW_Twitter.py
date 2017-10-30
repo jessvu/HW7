@@ -129,6 +129,7 @@ for term in range(3):
 	for r in results["statuses"][:5]:
 		print("Text:", r["text"])
 		print("Created at", r["created_at"])
+		
 
 ## 4. With what you learn from the data -- e.g. how exactly to find the 
 ##		text of each tweet in the big nested structure -- write code to print out 
